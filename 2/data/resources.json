@@ -1,0 +1,37 @@
+[
+  {
+    "name": "Biblioteca Centrală",
+    "type": "biblioteca",
+    "location": "Clădirea A, parter și etaj 1",
+    "program": "Luni - Vineri 08:00 - 20:00, Sâmbătă 10:00 - 16:00",
+    "tags": ["study", "books", "quiet"]
+  },
+  {
+    "name": "Sala de studiu 24/7",
+    "type": "spatiu_studiu",
+    "location": "Clădirea B, etaj 2",
+    "program": "Deschis non-stop (24/7)",
+    "tags": ["study", "group", "computers"]
+  },
+  {
+    "name": "Cantina Studențească",
+    "type": "cantina",
+    "location": "Clădirea C, parter",
+    "program": "Luni - Vineri 08:00 - 18:00",
+    "tags": ["food", "social"]
+  },
+  {
+    "name": "Sala de conferințe",
+    "type": "evenimente",
+    "location": "Clădirea D, etaj 1",
+    "program": "Conform programării evenimentelor",
+    "tags": ["events", "talks", "study"]
+  },
+  {
+    "name": "Curtea interioară",
+    "type": "relaxare",
+    "location": "Zona verde dintre clădiri",
+    "program": "Acces liber",
+    "tags": ["outdoor", "social", "relax"]
+  }
+]

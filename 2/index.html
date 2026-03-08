@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <title>Campus Info Hub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header>
+    <h1>Campus Info Hub</h1>
+    <nav>
+      <ul>
+        <li><a href="index.html">Acasă</a></li>
+        <li><a href="pages/library.html">Bibliotecă</a></li>
+        <li><a href="pages/cafeteria.html">Cantină</a></li>
+        <li><a href="pages/events.html">Evenimente</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section id="intro">
+      <h2>Bun venit!</h2>
+      <p>Campus Info Hub îți oferă informații rapide despre resursele importante din campus: bibliotecă, cantină, spații de studiu și evenimente.</p>
+      <p>Exemplu de link absolut către universitate:
+        <a href="https://www.uab.ro" target="_blank" rel="noopener noreferrer">Site-ul UAB din Alba Iulia</a>
+      </p>
+    </section>
+
+    <section id="filters">
+      <h2>Filtrează resursele</h2>
+      <div class="filters-container">
+        <div>
+          <label for="typeFilter">Filtru după tip:</label>
+          <select id="typeFilter">
+            <option value="all">Toate</option>
+          </select>
+        </div>
+        <div>
+          <label for="studyOnly">
+            <input type="checkbox" id="studyOnly">
+            Doar locuri destinate studiului
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <section id="resources">
+      <h2>Resurse din campus</h2>
+      <ul id="resourceList">
+        <!-- Populat dinamic cu JavaScript -->
+      </ul>
+    </section>
+
+    <section id="tagsSection">
+      <h2>Tag-uri / Categorii</h2>
+      <ul id="tagList">
+        <!-- Populat dinamic cu JavaScript -->
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Campus Info Hub</p>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
