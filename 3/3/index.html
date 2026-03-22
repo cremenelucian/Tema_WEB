@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="ro">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Laborator 3 - Acasă</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="light">
+    <div class="container">
+      <header>
+        <h1>Laborator 3: Cookies &amp; Storage</h1>
+        <nav>
+          <a href="index.html">Acasă</a>
+          <a href="preferences.html">Preferințe</a>
+          <a href="cookies-info.html">Cookies info</a>
+          <a href="login.html">Autentificare</a>
+        </nav>
+      </header>
+
+      <div class="card">
+        <div class="row">
+          <div>
+            <div id="welcome" style="font-weight: 800; font-size: 18px"></div>
+            <div class="muted" id="visits"></div>
+          </div>
+          <div class="actions" style="margin-top: 0">
+            <button class="btn btn-danger" id="clearAllBtn" type="button">Șterge Tot</button>
+          </div>
+        </div>
+        <div id="alertArea"></div>
+      </div>
+
+      <div class="grid cols-2" style="margin-top: 14px">
+        <section class="card">
+          <h2 style="margin: 0 0 10px">Cookies active</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Nume</th>
+                <th>Valoare</th>
+              </tr>
+            </thead>
+            <tbody id="cookiesTbody"></tbody>
+          </table>
+        </section>
+
+        <section class="card">
+          <h2 style="margin: 0 0 10px">localStorage</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Cheie</th>
+                <th>Valoare</th>
+              </tr>
+            </thead>
+            <tbody id="localTbody"></tbody>
+          </table>
+        </section>
+
+        <section class="card">
+          <h2 style="margin: 0 0 10px">sessionStorage</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Cheie</th>
+                <th>Valoare</th>
+              </tr>
+            </thead>
+            <tbody id="sessionTbody"></tbody>
+          </table>
+        </section>
+
+        <section class="card">
+          <h2 style="margin: 0 0 10px">Sumar</h2>
+          <div class="muted" id="summary"></div>
+        </section>
+      </div>
+    </div>
+
+    <script src="js/cookies.js"></script>
+    <script src="js/storage.js"></script>
+    <script>
+      function applyThemeFromCookie() {
+        const theme = CookieManager.get("theme") || "light";
+        document.body.classList.remove("light", "dark");
+        document.body.classList.add(theme === "dark" ? "dark" : "light");
+      }
+
+      function ensureVisitsIncrement() {
+        const raw = CookieManager.get("visits");
+        const current = Number.parseInt(raw ?? "0", 10);
+        const next = Number.isFinite(current) ? current + 1 : 1;
+        CookieManager.set("visits", String(next));
+        return next;
+      }
+
+      function escapeHtml(s) {
+        return String(s)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function prettyValue(v) {
+        if (v === null || v === undefined) return "";
+        if (typeof v === "string") return v;
+        try {
+          return JSON.stringify(v);
+        } catch {
+          return String(v);
+        }
+      }
+
+      function renderKeyValueTable(tbodyEl, obj) {
+        const entries = Object.entries(obj || {});
+        if (!entries.length) {
+          tbodyEl.innerHTML = '<tr><td colspan="2" class="muted">Nu există date.</td></tr>';
+          return;
+        }
+        tbodyEl.innerHTML = entries
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([k, v]) => `<tr><td><code>${escapeHtml(k)}</code></td><td>${escapeHtml(prettyValue(v))}</td></tr>`)
+          .join("");
+      }
+
+      function refreshAllTables() {
+        renderKeyValueTable(document.getElementById("cookiesTbody"), CookieManager.getAll());
+        renderKeyValueTable(document.getElementById("localTbody"), StorageManager.getAllLocal());
+        renderKeyValueTable(document.getElementById("sessionTbody"), StorageManager.getAllSession());
+
+        const cookiesCount = Object.keys(CookieManager.getAll()).length;
+        document.getElementById("summary").innerHTML = `
+          <div><b>Cookies</b>: ${cookiesCount}</div>
+          <div><b>localStorage</b>: ${localStorage.length}</div>
+          <div><b>sessionStorage</b>: ${sessionStorage.length}</div>
+        `;
+      }
+
+      function showAlert(type, message) {
+        const el = document.createElement("div");
+        el.className = `alert ${type === "error" ? "alert-error" : "alert-success"}`;
+        el.textContent = message;
+        const area = document.getElementById("alertArea");
+        area.innerHTML = "";
+        area.appendChild(el);
+      }
+
+      function clearAll() {
+        CookieManager.deleteAll();
+        StorageManager.clearLocal();
+        StorageManager.clearSession();
+        showAlert("success", "Cookies + localStorage + sessionStorage au fost șterse.");
+        applyThemeFromCookie();
+        const visitsNow = ensureVisitsIncrement();
+        document.getElementById("visits").textContent = `Vizite: ${visitsNow}`;
+        refreshAllTables();
+      }
+
+      (function init() {
+        applyThemeFromCookie();
+
+        const username = CookieManager.get("username") || "Vizitator";
+        const visitsNow = ensureVisitsIncrement();
+
+        document.getElementById("welcome").textContent = `Bun venit, ${username}!`;
+        document.getElementById("visits").textContent = `Vizite: ${visitsNow}`;
+
+        document.getElementById("clearAllBtn").addEventListener("click", clearAll);
+        refreshAllTables();
+      })();
+    </script>
+  </body>
+</html>

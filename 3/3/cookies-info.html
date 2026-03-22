@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="ro">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cookies & Storage - Info</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="light">
+    <div class="container">
+      <header>
+        <h1>Informații Cookies &amp; Storage</h1>
+        <nav>
+          <a href="index.html">Acasă</a>
+          <a href="preferences.html">Preferințe</a>
+          <a href="cookies-info.html">Cookies info</a>
+          <a href="login.html">Autentificare</a>
+        </nav>
+      </header>
+
+      <section class="card">
+        <h2 style="margin: 0 0 10px">Cookies</h2>
+        <div class="muted"><b>document.cookie (raw)</b></div>
+        <pre id="rawCookie"></pre>
+
+        <div style="margin-top: 10px">
+          <table>
+            <thead>
+              <tr>
+                <th>Nume</th>
+                <th>Valoare</th>
+                <th>Lungime</th>
+                <th>Acțiuni</th>
+              </tr>
+            </thead>
+            <tbody id="cookiesTbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <div class="grid cols-2" style="margin-top: 14px">
+        <section class="card">
+          <h2 style="margin: 0 0 10px">localStorage</h2>
+          <div class="muted"><b>JSON (formatat)</b></div>
+          <pre id="localJson"></pre>
+          <table>
+            <thead>
+              <tr>
+                <th>Cheie</th>
+                <th>Valoare</th>
+                <th>Dimensiune</th>
+                <th>Acțiuni</th>
+              </tr>
+            </thead>
+            <tbody id="localTbody"></tbody>
+          </table>
+        </section>
+
+        <section class="card">
+          <h2 style="margin: 0 0 10px">sessionStorage</h2>
+          <div class="muted"><b>JSON (formatat)</b></div>
+          <pre id="sessionJson"></pre>
+          <table>
+            <thead>
+              <tr>
+                <th>Cheie</th>
+                <th>Valoare</th>
+                <th>Dimensiune</th>
+                <th>Acțiuni</th>
+              </tr>
+            </thead>
+            <tbody id="sessionTbody"></tbody>
+          </table>
+        </section>
+      </div>
+
+      <section class="card" style="margin-top: 14px">
+        <h2 style="margin: 0 0 10px">Tabel comparativ</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Caracteristică</th>
+              <th>Cookies</th>
+              <th>localStorage</th>
+              <th>sessionStorage</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>Capacitate</b></td>
+              <td>~4 KB per cookie (depinde de browser)</td>
+              <td>~5-10 MB per origin</td>
+              <td>~5-10 MB per tab/origin</td>
+            </tr>
+            <tr>
+              <td><b>Expirare</b></td>
+              <td>Setabilă (expires/max-age) sau sesiune</td>
+              <td>Până la ștergere manuală</td>
+              <td>Până la închiderea tab-ului</td>
+            </tr>
+            <tr>
+              <td><b>Trimis la server?</b></td>
+              <td>Da, automat la fiecare request (dacă se potrivește domeniu/cale)</td>
+              <td>Nu</td>
+              <td>Nu</td>
+            </tr>
+            <tr>
+              <td><b>Accesibil din?</b></td>
+              <td>JavaScript (dacă nu e HttpOnly) + server</td>
+              <td>Doar JavaScript (browser)</td>
+              <td>Doar JavaScript (browser)</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+
+    <script src="js/cookies.js"></script>
+    <script src="js/storage.js"></script>
+    <script>
+      function applyThemeFromCookie() {
+        const theme = CookieManager.get("theme") || "light";
+        document.body.classList.remove("light", "dark");
+        document.body.classList.add(theme === "dark" ? "dark" : "light");
+      }
+
+      function escapeHtml(s) {
+        return String(s)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function prettyValue(v) {
+        if (v === null || v === undefined) return "";
+        if (typeof v === "string") return v;
+        try {
+          return JSON.stringify(v);
+        } catch {
+          return String(v);
+        }
+      }
+
+      function byteSize(str) {
+        try {
+          return new Blob([String(str)]).size;
+        } catch {
+          return String(str).length;
+        }
+      }
+
+      function refresh() {
+        document.getElementById("rawCookie").textContent = document.cookie || "(gol)";
+
+        const cookies = CookieManager.getAll();
+        const cookieEntries = Object.entries(cookies).sort(([a], [b]) => a.localeCompare(b));
+        document.getElementById("cookiesTbody").innerHTML =
+          cookieEntries.length === 0
+            ? '<tr><td colspan="4" class="muted">Nu există cookies.</td></tr>'
+            : cookieEntries
+                .map(
+                  ([name, value]) => `
+          <tr>
+            <td><code>${escapeHtml(name)}</code></td>
+            <td>${escapeHtml(value)}</td>
+            <td>${String(value).length}</td>
+            <td><button class="btn btn-small btn-danger" data-cookie-delete="${escapeHtml(name)}" type="button">Șterge</button></td>
+          </tr>`
+                )
+                .join("");
+
+        const localAll = StorageManager.getAllLocal();
+        const sessionAll = StorageManager.getAllSession();
+        document.getElementById("localJson").textContent = JSON.stringify(localAll, null, 2) || "{}";
+        document.getElementById("sessionJson").textContent = JSON.stringify(sessionAll, null, 2) || "{}";
+
+        const localEntries = Object.keys(localAll)
+          .sort((a, b) => a.localeCompare(b))
+          .map((k) => [k, localAll[k]]);
+        document.getElementById("localTbody").innerHTML =
+          localEntries.length === 0
+            ? '<tr><td colspan="4" class="muted">Nu există date.</td></tr>'
+            : localEntries
+                .map(([k, v]) => {
+                  const shown = prettyValue(v);
+                  return `
+          <tr>
+            <td><code>${escapeHtml(k)}</code></td>
+            <td>${escapeHtml(shown)}</td>
+            <td>${byteSize(shown)} B</td>
+            <td><button class="btn btn-small btn-danger" data-local-delete="${escapeHtml(k)}" type="button">Șterge</button></td>
+          </tr>`;
+                })
+                .join("");
+
+        const sessionEntries = Object.keys(sessionAll)
+          .sort((a, b) => a.localeCompare(b))
+          .map((k) => [k, sessionAll[k]]);
+        document.getElementById("sessionTbody").innerHTML =
+          sessionEntries.length === 0
+            ? '<tr><td colspan="4" class="muted">Nu există date.</td></tr>'
+            : sessionEntries
+                .map(([k, v]) => {
+                  const shown = prettyValue(v);
+                  return `
+          <tr>
+            <td><code>${escapeHtml(k)}</code></td>
+            <td>${escapeHtml(shown)}</td>
+            <td>${byteSize(shown)} B</td>
+            <td><button class="btn btn-small btn-danger" data-session-delete="${escapeHtml(k)}" type="button">Șterge</button></td>
+          </tr>`;
+                })
+                .join("");
+      }
+
+      document.addEventListener("click", (e) => {
+        const t = e.target;
+        if (!(t instanceof HTMLElement)) return;
+
+        const cookieName = t.getAttribute("data-cookie-delete");
+        if (cookieName) {
+          CookieManager.delete(cookieName);
+          refresh();
+          return;
+        }
+
+        const localKey = t.getAttribute("data-local-delete");
+        if (localKey) {
+          StorageManager.removeLocal(localKey);
+          refresh();
+          return;
+        }
+
+        const sessionKey = t.getAttribute("data-session-delete");
+        if (sessionKey) {
+          StorageManager.removeSession(sessionKey);
+          refresh();
+          return;
+        }
+      });
+
+      (function init() {
+        applyThemeFromCookie();
+        refresh();
+      })();
+    </script>
+  </body>
+</html>
